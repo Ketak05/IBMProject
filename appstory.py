@@ -108,7 +108,6 @@ st.markdown("""
         font-size: 1.25rem !important;
         font-weight: 600 !important;
         margin-bottom: 8px !important;
-        color: #343a40 !important;
     }
     
     .stTextInput input, .stTextArea textarea {
