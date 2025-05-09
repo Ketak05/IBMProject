@@ -108,6 +108,7 @@ st.markdown("""
         font-size: 1.25rem !important;
         font-weight: 600 !important;
         margin-bottom: 8px !important;
+        color: #343a40 !important;
     }
     
     .stTextInput input, .stTextArea textarea {
@@ -264,7 +265,7 @@ def initialize_huggingface_llm(api_key, model_name, temperature=0.7, max_length=
     return llm
 
 # Function to create story prompt
-def setup_story_prompt(characters, theme, plot, length, genre=None, setting=None):
+def setup_story_prompt(characters, theme, plot, length, mood, genre=None, setting=None):
     """Create a prompt for story generation based on user parameters"""
     template = """
     You are a creative story writer. Write an engaging and imaginative story based on 
@@ -277,12 +278,14 @@ def setup_story_prompt(characters, theme, plot, length, genre=None, setting=None
     - Use natural dialogue that reveals character and advances the plot
     - Structure the story with a clear beginning, middle, and end
     - Match the requested length (short ~500 words, medium ~1500 words, long ~3000 words)
+    - Maintain the requested mood throughout the story
     
     Please write a {length} story with the following elements:
     
     Characters: {characters}
     Theme: {theme}
     Plot: {plot}
+    Mood: {mood}
     {genre_text}
     {setting_text}
     
@@ -296,13 +299,13 @@ def setup_story_prompt(characters, theme, plot, length, genre=None, setting=None
     
     prompt = PromptTemplate(
         template=template,
-        input_variables=["characters", "theme", "plot", "length", "genre_text", "setting_text"]
+        input_variables=["characters", "theme", "plot", "length", "mood", "genre_text", "setting_text"]
     )
     
     return prompt
 
 # Function to generate story
-def generate_story(api_key, characters, theme, plot, length, temperature, model_name, genre=None, setting=None):
+def generate_story(api_key, characters, theme, plot, length, mood, temperature, model_name, genre=None, setting=None):
     """Generate a story using the HuggingFace LLM"""
     # Define length tokens
     length_tokens = {
@@ -322,7 +325,7 @@ def generate_story(api_key, characters, theme, plot, length, temperature, model_
     )
     
     # Create and format the prompt
-    prompt = setup_story_prompt(characters, theme, plot, length, genre, setting)
+    prompt = setup_story_prompt(characters, theme, plot, length, mood, genre, setting)
     llm_chain = LLMChain(llm=llm, prompt=prompt)
     
     # Generate the story
@@ -331,6 +334,7 @@ def generate_story(api_key, characters, theme, plot, length, temperature, model_
         "theme": theme,
         "plot": plot,
         "length": length,
+        "mood": mood,
         "genre_text": f"Genre: {genre}" if genre else "",
         "setting_text": f"Setting: {setting}" if setting else ""
     })
@@ -587,6 +591,7 @@ if st.session_state['generated_story'] and not generate_button:
                     meta['theme'],
                     meta['plot'],
                     meta['length'],
+                    meta['mood'],
                     temperature,
                     model_name,
                     meta.get('genre', ''),
@@ -632,6 +637,7 @@ if generate_button:
                     theme,
                     plot,
                     length,
+                    selected_mood,
                     temperature,
                     model_name,
                     genre,
@@ -649,6 +655,7 @@ if generate_button:
                     'theme': theme,
                     'plot': plot,
                     'length': length,
+                    'mood': selected_mood,
                     'genre': genre,
                     'setting': setting
                 }
